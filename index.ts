@@ -9,8 +9,10 @@ import {
   pipe,
   tap,
   MonoTypeOperatorFunction,
+  ObservedValueOf,
+  ObservableInput,
 } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { switchMap, toArray } from 'rxjs/operators';
 type Cod = { codice: string; value: string };
 
 of('World')
@@ -21,10 +23,11 @@ of('World')
 const obs$ = <T, K>(
   listauno: any[],
   listadue: any[]
-): OperatorFunction<T, K[]> => {
-  return (input$: Observable<T>) =>
+): OperatorFunction<T[], K[]> => {
+  return (input$: Observable<T[]>) =>
     input$.pipe(
       //tap(console.log),
+      switchMap<T[],ObservableInput<T>>(lista => lista),
       map<T, K>((test) => {
         let cambio = listauno.find((item) => item.codice === test['codice']);
         if (cambio) {
@@ -66,7 +69,7 @@ let listaUno = [
   { codice: 'cinque', value: 'cambio cinque' },
 ];
 
-from([
+of([
   { codice: 'uno', value: 'descrizione uno' },
   { codice: 'due', value: 'descrizione due' },
   { codice: 'tre', value: 'descrizione tre' },
