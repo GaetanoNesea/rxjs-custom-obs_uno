@@ -1,6 +1,15 @@
 import './style.css';
 
-import { of, map, Observable, from, OperatorFunction, pipe, tap } from 'rxjs';
+import {
+  of,
+  map,
+  Observable,
+  from,
+  OperatorFunction,
+  pipe,
+  tap,
+  MonoTypeOperatorFunction,
+} from 'rxjs';
 import { toArray } from 'rxjs/operators';
 type Cod = { codice: string; value: string };
 
@@ -24,9 +33,31 @@ const obs$ = <T, K>(
           return test;
         }
       }),
+      testTwo('proviamo con tag due'),
       toArray<K>()
     );
 };
+
+const testOne = <T>(
+  tag?: string
+): ((sorce$: Observable<T>) => Observable<T>) => {
+  return (source$: Observable<T>) =>
+    source$.pipe(
+      tap((value) =>
+        console.log((tag ? tag : 'nessun tag') + ' ' + JSON.stringify(value))
+      )
+    );
+};
+
+const testTwo = <T>(tag?: string): MonoTypeOperatorFunction<T> => {
+  return (source$: Observable<T>) =>
+    source$.pipe(
+      tap((value) =>
+        console.log(tag ? tag + JSON.stringify(value) : JSON.stringify(value))
+      )
+    );
+};
+
 let listaUno = [
   { codice: 'uno', value: 'cambio uno' },
   { codice: 'due', value: 'cambio due' },
@@ -42,5 +73,5 @@ from([
   { codice: 'quattro', value: 'descrizione quattro' },
   { codice: 'sei', value: 'descrizione cinque' },
 ])
-  .pipe(obs$(listaUno, listaUno))
+  .pipe(obs$(listaUno, listaUno), testOne('provimao'))
   .subscribe(console.log);
